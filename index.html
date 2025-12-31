@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 신년운세 - 붉은 말의 해</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 인트로 화면 */
+        .intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .intro-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .year-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)); }
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #a8dadc;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .fortune-bag {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #DC143C, #8B0000);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 40px rgba(220, 20, 60, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .fortune-bag:hover {
+            transform: scale(1.1);
+        }
+
+        .fortune-bag::before {
+            content: '福';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .fortune-bag.opening {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        .tap-text {
+            margin-top: 30px;
+            font-size: 1.1em;
+            color: #FFD700;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 입력 화면 */
+        .input-screen {
+            display: none;
+            padding: 40px 20px;
+        }
+
+        .input-screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #a8dadc;
+            font-size: 0.95em;
+        }
+
+        .input-group {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: #FFD700;
+        }
+
+        .birth-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .birth-inputs input,
+        .birth-inputs select {
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1em;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .birth-inputs input:focus,
+        .birth-inputs select:focus {
+            outline: none;
+            border-color: #FFD700;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .birth-inputs select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .gender-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .gender-btn {
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gender-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .gender-btn.selected {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1a1a2e;
+            border-color: #FFD700;
+            font-weight: bold;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1a1a2e;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 결과 화면 */
+        .result-screen {
+            display: none;
+            padding: 20px;
+        }
+
+        .result-screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            border-radius: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .user-info {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+
+        .zodiac-animal {
+            font-size: 2.5em;
+            margin: 15px 0;
+        }
+
+        .fortune-year {
+            font-size: 1.1em;
+            color: #a8dadc;
+        }
+
+        .fortune-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fortune-card h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fortune-card .icon {
+            font-size: 1.5em;
+        }
+
+        .fortune-card .content {
+            color: #e0e0e0;
+            line-height: 1.8;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        .lucky-items {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .lucky-items h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .lucky-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .lucky-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .lucky-item .label {
+            color: #a8dadc;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .lucky-item .value {
+            color: #FFD700;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFD700;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .share-tip {
+            text-align: center;
+            color: #a8dadc;
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        /* 추천 교육과정 */
+        .recommended-courses {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .recommended-courses h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+
+        .recommended-courses .subtitle {
+            text-align: center;
+            color: #a8dadc;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .course-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .course-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #FFD700;
+            transition: all 0.3s ease;
+        }
+
+        .course-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .course-item .category {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+        }
+
+        .course-item .title {
+            color: #fff;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        .enrollment-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .enrollment-info .label {
+            color: #FFD700;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .enrollment-info .detail {
+            color: #e0e0e0;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .enrollment-info .highlight {
+            color: #FFA500;
+            font-weight: bold;
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- 인트로 화면 -->
+    <div class="intro-screen" id="introScreen">
+        <h1 class="year-title">2026 신년운세</h1>
+        <p class="subtitle">붉은 말의 해, 나의 운세는?</p>
+        <div class="fortune-bag" id="fortuneBag">
+            <div class="tap-text">탭하여 시작하기</div>
+        </div>
+    </div>
+
+    <!-- 입력 화면 -->
+    <div class="input-screen container" id="inputScreen">
+        <div class="header">
+            <h1>2026 신년운세</h1>
+            <p>생년월일을 입력하고 나만의 운세를 확인하세요</p>
+        </div>
+
+        <div class="input-group">
+            <label>생년월일</label>
+            <div class="birth-inputs">
+                <input type="number" id="birthYear" placeholder="1990" min="1900" max="2025">
+                <select id="birthMonth">
+                    <option value="">월</option>
+                    <option value="1">1월</option>
+                    <option value="2">2월</option>
+                    <option value="3">3월</option>
+                    <option value="4">4월</option>
+                    <option value="5">5월</option>
+                    <option value="6">6월</option>
+                    <option value="7">7월</option>
+                    <option value="8">8월</option>
+                    <option value="9">9월</option>
+                    <option value="10">10월</option>
+                    <option value="11">11월</option>
+                    <option value="12">12월</option>
+                </select>
+                <select id="birthDay">
+                    <option value="">일</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>성별</label>
+            <div class="gender-buttons">
+                <button class="gender-btn" data-gender="male">남성 👨</button>
+                <button class="gender-btn" data-gender="female">여성 👩</button>
+            </div>
+        </div>
+
+        <button class="submit-btn" id="submitBtn">내 운세 보기 🔮</button>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div class="result-screen container" id="resultScreen">
+        <div class="result-header">
+            <div class="user-info" id="userInfo"></div>
+            <div class="zodiac-animal" id="zodiacAnimal"></div>
+            <div class="fortune-year">2026년 붉은 말의 해 운세</div>
+        </div>
+
+        <div class="fortune-card">
+            <h3><span class="icon">🌟</span> 종합운</h3>
+            <div class="content" id="overallFortune"></div>
+        </div>
+
+        <div class="fortune-card">
+            <h3><span class="icon">💰</span> 금전운</h3>
+            <div class="content" id="moneyFortune"></div>
+        </div>
+
+        <div class="fortune-card">
+            <h3><span class="icon">❤️</span> 애정운</h3>
+            <div class="content" id="loveFortune"></div>
+        </div>
+
+        <div class="fortune-card">
+            <h3><span class="icon">💼</span> 사업운</h3>
+            <div class="content" id="careerFortune"></div>
+        </div>
+
+        <div class="fortune-card">
+            <h3><span class="icon">🏥</span> 건강운</h3>
+            <div class="content" id="healthFortune"></div>
+        </div>
+
+        <div class="fortune-card">
+            <h3><span class="icon">📚</span> 학습운</h3>
+            <div class="content" id="learningFortune"></div>
+        </div>
+
+        <div class="lucky-items">
+            <h3>🍀 2026년 나의 행운 아이템</h3>
+            <div class="lucky-grid">
+                <div class="lucky-item">
+                    <div class="label">행운의 색</div>
+                    <div class="value" id="luckyColor"></div>
+                </div>
+                <div class="lucky-item">
+                    <div class="label">행운의 숫자</div>
+                    <div class="value" id="luckyNumber"></div>
+                </div>
+                <div class="lucky-item">
+                    <div class="label">행운의 방향</div>
+                    <div class="value" id="luckyDirection"></div>
+                </div>
+                <div class="lucky-item">
+                    <div class="label">행운의 달</div>
+                    <div class="value" id="luckyMonth"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recommended-courses">
+            <h3>🎓 2026년 나에게 딱 맞는 KT DS 컨소시엄 교육</h3>
+            <p class="subtitle">당신의 운세를 바탕으로 추천하는 교육과정입니다</p>
+            <div class="course-list" id="courseList"></div>
+            
+            <div class="enrollment-info">
+                <div class="label">📌 수강 신청 안내</div>
+                <div class="detail">
+                    <span class="highlight">모집 시작:</span> 2026년 1월 말 이전<br>
+                    <span class="highlight">신청 방법:</span> 컨소시엄 홈페이지를 통한 온라인 신청<br>
+                    <span class="highlight">문의:</span> KT DS 인재개발팀 컨소시엄 담당
+                </div>
+                <button class="submit-btn" onclick="window.open('https://edu.ktdsuniversity.com/', '_blank')" style="margin-top: 15px; font-size: 1em; padding: 12px;">
+                    컨소시엄 홈페이지 바로가기 🔗
+                </button>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" id="retryBtn">다시 보기 🔄</button>
+            <button class="action-btn" id="shareBtn">공유하기 📤</button>
+        </div>
+
+        <div class="share-tip">
+            💡 화면을 캡처해서 친구들과 공유해보세요!
+        </div>
+    </div>
+
+    <script>
+        // 띠 데이터
+        const zodiacAnimals = [
+            { name: '원숭이', emoji: '🐵', years: [1920, 1932, 1944, 1956, 1968, 1980, 1992, 2004, 2016] },
+            { name: '닭', emoji: '🐔', years: [1921, 1933, 1945, 1957, 1969, 1981, 1993, 2005, 2017] },
+            { name: '개', emoji: '🐶', years: [1922, 1934, 1946, 1958, 1970, 1982, 1994, 2006, 2018] },
+            { name: '돼지', emoji: '🐷', years: [1923, 1935, 1947, 1959, 1971, 1983, 1995, 2007, 2019] },
+            { name: '쥐', emoji: '🐭', years: [1924, 1936, 1948, 1960, 1972, 1984, 1996, 2008, 2020] },
+            { name: '소', emoji: '🐮', years: [1925, 1937, 1949, 1961, 1973, 1985, 1997, 2009, 2021] },
+            { name: '호랑이', emoji: '🐯', years: [1926, 1938, 1950, 1962, 1974, 1986, 1998, 2010, 2022] },
+            { name: '토끼', emoji: '🐰', years: [1927, 1939, 1951, 1963, 1975, 1987, 1999, 2011, 2023] },
+            { name: '용', emoji: '🐲', years: [1928, 1940, 1952, 1964, 1976, 1988, 2000, 2012, 2024] },
+            { name: '뱀', emoji: '🐍', years: [1929, 1941, 1953, 1965, 1977, 1989, 2001, 2013, 2025] },
+            { name: '말', emoji: '🐴', years: [1930, 1942, 1954, 1966, 1978, 1990, 2002, 2014] },
+            { name: '양', emoji: '🐑', years: [1931, 1943, 1955, 1967, 1979, 1991, 2003, 2015] }
+        ];
+
+        // 운세 데이터베이스
+        const fortuneDatabase = {
+            overall: [
+                { min: 85, max: 100, text: "2026년은 당신에게 최고의 해가 될 것입니다! 붉은 말의 역동성과 열정이 당신의 도전을 응원하며, 새로운 기회들이 활짝 열립니다. 오랫동안 준비해온 일들이 결실을 맺고, 주변 사람들로부터 인정받는 한 해가 됩니다." },
+                { min: 70, max: 84, text: "붉은 말의 해는 당신에게 안정과 성장을 동시에 가져다줍니다. 상반기보다는 하반기에 더 큰 변화와 발전이 있을 것으로 보입니다. 인내심을 갖고 차근차근 나아간다면 원하는 목표를 충분히 달성할 수 있습니다." },
+                { min: 55, max: 69, text: "평온하고 안정적인 한 해가 예상됩니다. 큰 변화보다는 현재 상태를 유지하며 내실을 다지는 것이 좋습니다. 작은 행복과 일상의 소중함을 발견하는 시간이 될 것입니다." },
+                { min: 0, max: 54, text: "시련이 있더라도 포기하지 마세요. 말처럼 힘차게 달리며 새로운 도전을 시작할 수 있는 해입니다. 어려움은 성장의 기회이며, 하반기로 갈수록 운이 상승합니다." }
+            ],
+            money: [
+                { min: 85, max: 100, text: "재물운이 매우 좋습니다! 투자나 부업에서 예상치 못한 수익이 발생할 수 있습니다. 다만 욕심을 부리지 말고 적절한 선에서 만족하는 것이 중요합니다. 저축 습관을 들이면 더욱 큰 자산을 형성할 수 있습니다." },
+                { min: 70, max: 84, text: "꾸준한 수입이 예상되며, 부수입의 기회도 있습니다. 충동구매를 자제하고 계획적으로 소비한다면 재정 상태가 크게 개선됩니다. 하반기에 재테크 기회가 찾아올 수 있습니다." },
+                { min: 55, max: 69, text: "수입과 지출의 균형을 잘 맞추는 것이 중요합니다. 큰 돈은 들어오지 않더라도 안정적인 경제 상태를 유지할 수 있습니다. 저축보다는 자기계발에 투자하는 것이 장기적으로 유리합니다." },
+                { min: 0, max: 54, text: "지출을 신중하게 관리해야 하는 시기입니다. 불필요한 소비를 줄이고, 큰 투자는 가급적 피하세요. 작은 돈이라도 모으는 습관이 미래에 큰 도움이 됩니다." }
+            ],
+            love: [
+                { min: 85, max: 100, text: "연애운이 활짝 핍니다! 솔로라면 이상형을 만날 확률이 높고, 연인이 있다면 관계가 한층 깊어집니다. 결혼을 앞둔 커플이라면 좋은 소식이 있을 것입니다. 마음을 열고 적극적으로 다가가세요." },
+                { min: 70, max: 84, text: "따뜻하고 안정적인 관계를 유지할 수 있습니다. 새로운 만남보다는 기존 관계를 발전시키는 것이 유리합니다. 소통과 배려가 관계를 더욱 돈독하게 만듭니다." },
+                { min: 55, max: 69, text: "평범하지만 소중한 일상을 함께할 수 있습니다. 큰 이벤트보다는 작은 순간들이 관계를 채워줍니다. 서두르지 말고 천천히 관계를 발전시켜 나가세요." },
+                { min: 0, max: 54, text: "관계에서 오해나 갈등이 생길 수 있으니 대화와 이해가 필요합니다. 감정을 억누르지 말고 솔직하게 표현하는 것이 중요합니다. 잠시 거리를 두는 것도 관계 회복에 도움이 됩니다." }
+            ],
+            career: [
+                { min: 85, max: 100, text: "직장에서 인정받고 승진이나 좋은 기회가 찾아옵니다. 새로운 프로젝트를 맡게 되거나 중요한 역할을 하게 될 것입니다. 창업을 고민 중이라면 충분히 도전해볼 만한 시기입니다." },
+                { min: 70, max: 84, text: "성실함과 노력이 빛을 발하는 해입니다. 눈에 띄는 성과가 있을 것이며, 상사나 동료들과의 관계도 좋아집니다. 교육이나 자격증 취득에 투자하면 더 큰 기회를 잡을 수 있습니다." },
+                { min: 55, max: 69, text: "현 상태를 유지하며 꾸준히 일하는 것이 좋습니다. 급격한 변화보다는 안정을 추구하세요. 업무 능력을 차근차근 쌓아가면 다음 기회를 준비할 수 있습니다." },
+                { min: 0, max: 54, text: "업무상 어려움이 있을 수 있지만 이겨낼 수 있습니다. 스트레스 관리가 중요하며, 휴식과 재충전의 시간이 필요합니다. 무리한 결정보다는 신중하게 판단하세요." }
+            ],
+            health: [
+                { min: 85, max: 100, text: "체력과 활력이 넘치는 한 해입니다! 규칙적인 운동과 건강한 식습관을 유지한다면 최상의 컨디션을 유지할 수 있습니다. 새로운 운동이나 건강 관리법을 시도하기 좋은 시기입니다." },
+                { min: 70, max: 84, text: "전반적으로 건강한 상태를 유지합니다. 작은 불편함이 있다면 초기에 관리하는 것이 중요합니다. 스트레스 해소를 위한 취미 생활이나 명상이 도움이 됩니다." },
+                { min: 55, max: 69, text: "무리하지 않는 선에서 건강을 유지할 수 있습니다. 과로를 피하고 충분한 수면을 취하세요. 정기적인 건강검진으로 미리 예방하는 것이 좋습니다." },
+                { min: 0, max: 54, text: "건강 관리에 특별히 신경 써야 합니다. 과로나 스트레스로 인한 문제가 생길 수 있으니 휴식을 충분히 취하세요. 병원 방문을 미루지 말고 불편한 증상이 있으면 바로 검진받으세요." }
+            ],
+            learning: [
+                { min: 85, max: 100, text: "학습운이 최고조입니다! 새로운 자격증이나 기술을 배우기에 완벽한 해입니다. 컨소시엄 교육과정을 적극 활용하면 업무 역량이 크게 향상됩니다. 배운 내용을 실무에 바로 적용하며 전문성을 키워갈 수 있습니다." },
+                { min: 70, max: 84, text: "꾸준한 학습이 큰 성과로 이어집니다. 관심 있던 분야의 교육을 받으면 새로운 기회가 열립니다. AI, 디지털 전환 등 트렌드 교육에 투자하면 경쟁력이 높아집니다. 동료들과 스터디 그룹을 만들어 함께 성장하세요." },
+                { min: 55, max: 69, text: "자기계발에 시간을 투자할 가치가 있습니다. 온라인 강의나 짧은 과정부터 시작해보세요. 배운 것을 정리하고 복습하는 습관이 실력 향상의 지름길입니다. 업무와 학습의 균형을 잘 맞추세요." },
+                { min: 0, max: 54, text: "학습에 어려움이 있더라도 포기하지 마세요. 처음에는 힘들어도 반복하면 익숙해집니다. 기초부터 차근차근 다지는 것이 중요합니다. 교육 담당자나 강사님께 적극적으로 질문하며 도움을 받으세요." }
+            ]
+        };
+
+        // 행운 아이템 데이터
+        const luckyItems = {
+            colors: ['빨강', '금색', '청록', '보라', '은색', '초록', '주황', '분홍'],
+            numbers: ['3, 8', '7, 14', '2, 9', '1, 6', '4, 11', '5, 12'],
+            directions: ['동쪽', '서쪽', '남쪽', '북쪽', '남동쪽', '남서쪽', '북동쪽', '북서쪽'],
+            months: ['3월', '5월', '8월', '10월', '6월', '9월', '4월', '11월']
+        };
+
+        // 2026년 KT DS 컨소시엄 교육과정
+        const courses = {
+            msa: [
+                { title: 'Spring Cloud를 활용한 MSA 구축 기본', category: 'MSA' },
+                { title: 'Spring Cloud를 활용한 MSA 구축 활용', category: 'MSA' },
+                { title: 'MSA 클라우드 배포 및 운영', category: 'MSA' }
+            ],
+            frontend: [
+                { title: '리액트 기반 실전 프론트엔드 개발', category: '프론트엔드' }
+            ],
+            infra: [
+                { title: '실전으로 배우는 리눅스 입문과 활용', category: '인프라' },
+                { title: 'Docker & Kubernetes 클라우드 아키텍처와 운영', category: '인프라' }
+            ],
+            ai: [
+                { title: '최신 AI 개발환경에서 배우는 커서 바이브코딩 입문', category: 'AI' },
+                { title: '15시간 완성! 누구나 할 수 있는 Azure AI 핵심 실습', category: 'AI' },
+                { title: '생성형 AI 고급 활용 및 Agent AI 구현하기', category: 'AI' }
+            ],
+            cloud: [
+                { title: 'AI 활용을 위한 Azure 운영 마스터하기(Cloud에서 AI까지)', category: '클라우드' },
+                { title: 'Azure 네트워크 인프라 구축(기초부터 실무 중심의 설계와 운영)', category: '클라우드' },
+                { title: 'Azure App Service 및 Virtual Network 활용', category: '클라우드' }
+            ],
+            database: [
+                { title: '오라클 데이터베이스 SQL 19c 실무', category: '데이터베이스' },
+                { title: '성능을 고려한 최적의 SQL 작성(튜닝 part1)', category: '데이터베이스' },
+                { title: '성능을 고려한 최적의 SQL 작성(튜닝 part2)', category: '데이터베이스' },
+                { title: 'Postgre SQL PPAS 실무적용', category: '데이터베이스' }
+            ],
+            security: [
+                { title: '개발자를 위한 보안 실무', category: '보안' }
+            ],
+            quality: [
+                { title: 'ITO품질 관리 베이직', category: '품질관리' }
+            ]
+        };
+
+        let selectedGender = '';
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDays();
+            
+            // 이벤트 리스너
+            document.getElementById('fortuneBag').addEventListener('click', startFortune);
+            document.getElementById('birthMonth').addEventListener('change', updateDays);
+            document.querySelectorAll('.gender-btn').forEach(btn => {
+                btn.addEventListener('click', selectGender);
+            });
+            document.getElementById('submitBtn').addEventListener('click', calculateFortune);
+            document.getElementById('retryBtn').addEventListener('click', retry);
+            document.getElementById('shareBtn').addEventListener('click', share);
+        });
+
+        // 날짜 초기화
+        function initializeDays() {
+            const daySelect = document.getElementById('birthDay');
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '일';
+                daySelect.appendChild(option);
+            }
+        }
+
+        // 월에 따라 날짜 업데이트
+        function updateDays() {
+            const month = parseInt(document.getElementById('birthMonth').value);
+            const year = parseInt(document.getElementById('birthYear').value) || 2000;
+            const daySelect = document.getElementById('birthDay');
+            const currentDay = parseInt(daySelect.value);
+            
+            daySelect.innerHTML = '<option value="">일</option>';
+            
+            let maxDays = 31;
+            if ([4, 6, 9, 11].includes(month)) maxDays = 30;
+            else if (month === 2) {
+                maxDays = (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28;
+            }
+            
+            for (let i = 1; i <= maxDays; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '일';
+                daySelect.appendChild(option);
+            }
+            
+            if (currentDay && currentDay <= maxDays) {
+                daySelect.value = currentDay;
+            }
+        }
+
+        // 운세 시작
+        function startFortune() {
+            const bag = document.getElementById('fortuneBag');
+            bag.classList.add('opening');
+            
+            setTimeout(() => {
+                document.getElementById('introScreen').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('inputScreen').classList.add('active');
+                }, 500);
+            }, 500);
+        }
+
+        // 성별 선택
+        function selectGender(e) {
+            document.querySelectorAll('.gender-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            e.target.classList.add('selected');
+            selectedGender = e.target.dataset.gender;
+        }
+
+        // 띠 계산
+        function getZodiacAnimal(year) {
+            for (let zodiac of zodiacAnimals) {
+                if (zodiac.years.includes(year)) {
+                    return zodiac;
+                }
+            }
+            // fallback: 12년 주기로 계산
+            const remainder = year % 12;
+            const index = (remainder + 8) % 12;
+            return zodiacAnimals[index];
+        }
+
+        // 운세 점수 계산 (생년월일 기반)
+        function calculateScore(year, month, day, seed) {
+            const hash = (year * 10000 + month * 100 + day + seed) % 100;
+            return 50 + (hash % 50); // 50-99 범위
+        }
+
+        // 운세 텍스트 선택
+        function getFortune(category, score) {
+            const fortunes = fortuneDatabase[category];
+            for (let fortune of fortunes) {
+                if (score >= fortune.min && score <= fortune.max) {
+                    return fortune.text;
+                }
+            }
+            return fortunes[2].text; // 기본값
+        }
+
+        // 운세 점수 기반 추천 교육과정 선택
+        function recommendCourses(scores) {
+            const { overall, learning, career, money } = scores;
+            const recommended = [];
+            
+            // 학습운이 높으면 AI/최신 기술
+            if (learning >= 70) {
+                recommended.push(...courses.ai.slice(0, 2));
+            }
+            
+            // 사업운/금전운이 높으면 클라우드/MSA
+            if (career >= 70 || money >= 70) {
+                recommended.push(...courses.cloud.slice(0, 1));
+                recommended.push(...courses.msa.slice(0, 1));
+            }
+            
+            // 종합운이 높으면 프론트엔드/인프라
+            if (overall >= 70) {
+                recommended.push(...courses.frontend[0]);
+                recommended.push(...courses.infra[1]);
+            }
+            
+            // 기본 추천 (학습운이 낮을 때 기초 과정)
+            if (learning < 70) {
+                recommended.push(...courses.infra.slice(0, 1));
+                recommended.push(...courses.database.slice(0, 1));
+            }
+            
+            // 중복 제거 및 최대 4개로 제한
+            const unique = [...new Map(recommended.map(item => [item.title, item])).values()];
+            return unique.slice(0, 4);
+        }
+
+        // 운세 계산 및 표시
+        function calculateFortune() {
+            const year = parseInt(document.getElementById('birthYear').value);
+            const month = parseInt(document.getElementById('birthMonth').value);
+            const day = parseInt(document.getElementById('birthDay').value);
+            
+            if (!year || !month || !day || !selectedGender) {
+                alert('모든 정보를 입력해주세요!');
+                return;
+            }
+            
+            if (year < 1900 || year > 2025) {
+                alert('올바른 연도를 입력해주세요!');
+                return;
+            }
+            
+            // 띠 계산
+            const zodiac = getZodiacAnimal(year);
+            const age = 2026 - year;
+            
+            // 각 운세 점수 계산
+            const overallScore = calculateScore(year, month, day, 1);
+            const moneyScore = calculateScore(year, month, day, 2);
+            const loveScore = calculateScore(year, month, day, 3);
+            const careerScore = calculateScore(year, month, day, 4);
+            const healthScore = calculateScore(year, month, day, 5);
+            const learningScore = calculateScore(year, month, day, 6);
+            
+            // 행운 아이템 선택
+            const luckyColor = luckyItems.colors[(year + month + day) % luckyItems.colors.length];
+            const luckyNumber = luckyItems.numbers[(year * month + day) % luckyItems.numbers.length];
+            const luckyDirection = luckyItems.directions[(year + month * day) % luckyItems.directions.length];
+            const luckyMonth = luckyItems.months[(year * day + month) % luckyItems.months.length];
+            
+            // 결과 화면에 데이터 표시
+            document.getElementById('userInfo').textContent = `${year}년 ${month}월 ${day}일생 (만 ${age-1}세)`;
+            document.getElementById('zodiacAnimal').textContent = `${zodiac.emoji} ${zodiac.name}띠`;
+            
+            // 운세 내용
+            document.getElementById('overallFortune').textContent = getFortune('overall', overallScore);
+            document.getElementById('moneyFortune').textContent = getFortune('money', moneyScore);
+            document.getElementById('loveFortune').textContent = getFortune('love', loveScore);
+            document.getElementById('careerFortune').textContent = getFortune('career', careerScore);
+            document.getElementById('healthFortune').textContent = getFortune('health', healthScore);
+            document.getElementById('learningFortune').textContent = getFortune('learning', learningScore);
+            
+            // 행운 아이템
+            document.getElementById('luckyColor').textContent = luckyColor;
+            document.getElementById('luckyNumber').textContent = luckyNumber;
+            document.getElementById('luckyDirection').textContent = luckyDirection;
+            document.getElementById('luckyMonth').textContent = luckyMonth;
+            
+            // 추천 교육과정
+            const recommendedCourses = recommendCourses({
+                overall: overallScore,
+                learning: learningScore,
+                career: careerScore,
+                money: moneyScore
+            });
+            
+            const courseListHTML = recommendedCourses.map(course => `
+                <div class="course-item">
+                    <div class="category">${course.category}</div>
+                    <div class="title">${course.title}</div>
+                </div>
+            `).join('');
+            document.getElementById('courseList').innerHTML = courseListHTML;
+            
+            // 화면 전환
+            document.getElementById('inputScreen').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('resultScreen').classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        // 다시 보기
+        function retry() {
+            document.getElementById('resultScreen').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('inputScreen').classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        // 공유하기
+        function share() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '2026 신년운세',
+                    text: '나의 2026년 운세를 확인해보세요!',
+                    url: window.location.href
+                }).catch(() => {
+                    alert('화면을 캡처해서 공유해보세요! 📸');
+                });
+            } else {
+                alert('화면을 캡처해서 친구들과 공유해보세요! 📸');
+            }
+        }
+    </script>
+</body>
+</html>
